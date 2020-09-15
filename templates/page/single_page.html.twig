@@ -1,0 +1,220 @@
+{% extends "base.html.twig" %}
+{% block title %}
+	Afficher client
+{% endblock %}
+{% block body %}
+	<div class="titre_page">
+		<h2>Details du client</h2>
+	</div>
+
+	<div class="container single_content">
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="nom_client">
+					<p>{{ item.nom }}
+						<br>
+						{% if item.prenom is defined and item.prenom is not null %}
+							{{ item.prenom }}
+						{% endif %}
+					</p>
+				</div>
+				<div class="matricule_client">
+					<p>
+						Matricule: {{ item.matricule }}
+					</p>
+				</div>
+				<div class="adresse_client">
+					<p>
+						Adresse : {{ item.adresse }}
+					</p>
+				</div>
+				<div class="cin_client">
+					<p>
+						CIN numéro : {{ item.cin }}
+					</p>
+				</div>
+				<div class="cin">
+					<a href="#" class="link_cin">
+						<img src="{{ asset('uploads/cin_images/' ~ item.getImage1()) }}" class="img-responsive img-thumbnail" width="90%" height="250" alt="cin 1">
+					</a>
+					<a href="#" class="link_cin">
+						<img src="{{ asset('uploads/cin_images/' ~ item.getImage2()) }}" class="img-responsive img-thumbnail" width="90%" height="250" alt="cin 1">
+					</a>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="montant_client">
+					<p>
+						<label for="">Montant :</label>
+						<span>{{ item.montant }}</span>
+						<span>Ar</span>
+					</p>
+				</div>
+				<div class="date_debut">
+					<p>
+						<label for="">Date de début:</label>
+						<span class="dd">{{ item.getDateDebut() | date('Y-m-d') }} </span><span>(année-mois-jour)</span>
+					</p>
+				</div>
+				<div class="mois_client">
+					<p>
+						<label for="">Nombre de mois du versement prévu :</label>
+						<span class="nbr_versement_total">{{ item.getNbrVersement() }}</span>
+						<span>mois</span>
+						<span class="nbr_eff" data-paiement-effectue = "{{ nbr_p_effectue }}"></span>
+					</p>
+				</div>
+				<div class="montant_client_payé">
+					<p>
+						<label for="">Montant payé :</label>
+						<span>{{ montant_paye }}</span>
+						<span>Ar</span>
+					</p>
+				</div>
+				<div class="montant_client_restant">
+					<p>
+						<label for="">Montant restant :</label>
+						<span>{{ montant_restant }}</span>
+						<span>Ar</span>
+					</p>
+				</div>
+				<div class="mois_client_restant">
+					<p>
+						<label for="">Nombre de mois du versement en attente :</label>
+						<span class="nbr_mois_restant">{{ nbr_mois_restant }}</span>
+						<span>mois</span>
+					</p>
+				</div>
+				{# <div class="date_dernier_pointage">
+					<p>
+						<label for="">Date du dernier pointage :</label>
+						<span class="date_last_point"> {{ data_last_pointage }} </span>
+					</p>
+				</div> #}
+				
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="titre_page">
+			<h2>Etat actuel du paiement effectué</h2>
+		</div>
+		<div class="tableau_etat">
+			<ul>
+			</ul>
+		</div>
+		<div class="action_dangeureux">
+			<a href="{{ path('suspendre_client', {'id':item.id}) }}" class="btn btn-danger btn-sm">Suspendre ce client</a>
+			<a href="{{ path('classe_impaye_client', {'id':item.id}) }}" class="btn btn-warning btn-sm">Classer impayé</a>
+		</div>
+	</div>
+
+{% endblock %}
+{% block javascripts %}
+	<script>
+		$(document).ready(function(){
+
+			var dd = $('.dd').text();
+			var dm = parseInt(dd.split('-')[1]);
+			var annee = parseInt(dd.split('-')[0]);
+			var annee2 = annee++;
+			// decxalage de derb=nier pointage et le mois actuel
+			var date_actus = new Date();
+			var mois_actus = date_actus.getMonth() + 1 ;
+
+			// date du dernier pointage
+			var ddp = $('.date_last_point').text();
+
+			// mois ddp
+			var mddp = parseInt(ddp.split('-')[1]);
+
+			// decalage = 
+			var decalage = mois_actus - mddp ;
+
+			 // nombre de mois à afficher
+			 var nma = parseInt($('.nbr_versement_total').text()); 
+
+			 //n mois eff
+			 var nbr_pointage_e = parseInt($('.nbr_eff').attr('data-paiement-effectue'));
+			 //alert("nma="+nma+"/ nme="+nbr_pointage_e+"mois de debut de paiement="+dm) marina
+			 var tab_mois = [];
+
+			// il faut afficher le tableau de mois de mddp à nma 
+			 var mois = [
+				'Janvier',
+				'Février',
+				 'Mars',
+				 'Avril',
+				'Mai',
+				'Juin',
+				'Juillet',
+				'Août',
+				'Septembre',
+				'Octobre',
+				'Novembre',
+				'Décembre']
+
+
+			// pour le calcul
+			/*for (var i = 5; i <=19; i++) { // 19 = (5 + 15) - 1 où 15 = nma et 5 = debut de mois
+				if(i<=11){
+					//console.log(mois[i])
+					tab_mois.push(mois[i]+"-"+annee2);
+				}
+				if( i>= 12){
+					// supposon que le nma = 15
+					var j = i % 12 ;
+						//console.log(mois[j])
+						tab_mois.push(mois[j]+"-"+annee);
+				}
+			}
+			//console.log(tab_mois)
+			// design
+			$('.tableau_etat ul').html('');
+			var string = "";
+			for (var i = 0; i < tab_mois.length; i++) {
+				if(i<5){ // ex 5 = nbr de pointage effectué avant
+					string+='<li><span>'+tab_mois[i]+'</span><span><i class="fa fa-check"></i></span></li>'
+				}
+				else{
+					string+='<li><span>'+tab_mois[i]+'</span><span></span></li>'
+				}
+				
+			}
+			$('.tableau_etat ul').html(string);*/
+
+			// en pratique 
+			var fin_boucle = (dm + nma) - 1;
+			var debut_boucle = dm;
+			for (var i = debut_boucle - 1; i <=fin_boucle; i++) { // 19 = (5 + 15) - 1 où 15 = nma et 5 = debut de mois
+				if(i<=11){
+					//console.log(mois[i])
+					tab_mois.push(mois[i]+"-"+annee2);
+				}
+				if( i>= 12){
+					// supposon que le nma = 15
+					var j = i % 12 ;
+						//console.log(mois[j])
+						tab_mois.push(mois[j]+"-"+annee);
+				}
+			}
+			//console.log(tab_mois)
+			// design
+			$('.tableau_etat ul').html('');
+			var string = "";
+			for (var i = 0; i < tab_mois.length; i++) {
+				if(i<nbr_pointage_e){ // ex 5 = nbr de pointage effectué avant
+					string+='<li><span>'+tab_mois[i]+'</span><span><i class="fa fa-check"></i></span></li>'
+				}
+				else{
+					string+='<li><span>'+tab_mois[i]+'</span><span></span></li>'
+				}
+				
+			}
+			$('.tableau_etat ul').html(string);
+			
+
+		})
+	
+	</script>
+{% endblock %}

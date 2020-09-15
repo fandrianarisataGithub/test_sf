@@ -1,0 +1,158 @@
+{% extends "base.html.twig" %}
+{% block title %}
+	client suspendu
+{% endblock %}
+{% block body %}
+	<div class="titre_page">
+		<h2>Liste des clients suspendus</h2>
+	</div>
+
+	<div class="tableau tab_historique">
+		<table class="display" id="tab_client_heb" style="width:100%">
+			<thead>
+				<tr>
+					<td>
+						<span>MATRICULE</span>
+					</td>
+					<td>
+						<span>NOM ET PRENOM</span>
+					</td>
+					<td>
+						<span>CIN</span>
+					</td>
+					<td>
+						<span>ADRESSE</span>
+					</td>
+					<td>
+						<span>MONTANT</span>
+					</td>
+					<td>
+						<span>MONTANT
+							<br>
+							MENSUEL</span>
+					</td>
+					<td>
+						<span>NBR VERSEMENT</span>
+					</td>
+					<td>
+						<span>DATE DE DEBUT</span>
+					</td>
+					<td>
+						<span>DATE DE FIN</span>
+					</td>
+					<td>
+						<span>ACTIONS</span>
+					</td>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in items %}
+					<tr>
+						<td>
+							<span>{{ item.matricule }}</span>
+						</td>
+						<td>
+							<span>{{ item.nom }}</span><br>
+							<span>{{  item.prenom }}</span>
+						</td>
+						<td>
+							<span>{{ item.cin }}</span>
+							
+						</td>
+						<td>
+							<span>{{ item.adresse }}</span>
+						</td>
+						<td>
+							<span>{{ item.montant }}</span>
+							<span>Ar</span>
+						</td>
+						<td>
+							<span>{{ item.getMontantMensuel() }}</span>
+							<span>Ar</span>
+						</td>
+						<td>
+							<span>{{ item.getNbrVersement() }}</span>
+						</td>
+						<td>
+							<span>{{ item.getDateDebut() | date('Y-m-d') }}</span>
+						</td>
+						<td>
+							<span>{{ item.getDatefin() | date('Y-m-d') }}</span>
+						</td>
+						<td>
+							<div class="action">
+								<a href="{{ path('edit_client', {'id': item.id }) }}" class="modif btn btn-info btn-xs" {% if is_granted('ROLE_ADMIN') %} style="display:flex;" {% else %} style="display:none;" {% endif %}>
+									<span class="fa fa-edit"></span>
+								</a>
+								<a href="#" data-id-client = "{{ item.id }}" class="suppr btn btn-danger btn-xs" {% if is_granted('ROLE_ADMIN') %} style="display:flex;" {% else %} style="display:none;" {% endif %}>
+									<span class="fa fa-trash-o"></span>
+								</a>
+								<a href="{{ path('single_page', {'id_client': item.id }) }}" class="voir btn btn-primary btn-xs" {% if is_granted('ROLE_ADMIN') %} style="display:flex;" {% else %} style="display:none;" {% endif %}>
+									<span>Voir</span>
+								</a>
+							</div>
+						</td>
+
+					</tr>
+				{% endfor %}
+
+
+			</tbody>
+		</table>
+		<div class="titre_page footer">
+			<h2>
+				<a href="{{ path('imprimer_client_suspendu') }}" class="btn btn-primary">Imprimer la liste</a>
+			</h2>
+		</div>
+
+	</div>
+
+{% endblock %}
+{% block javascripts %}
+	<script>
+
+		 $(document).ready(function() {
+            var table = $('#tab_client_heb').DataTable({
+                "language": {
+                    "sEmptyTable": "Aucune donnée disponible dans le tableau",
+                    "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
+                    "sInfoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
+                    "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+                    "sInfoPostFix": "",
+                    "sInfoThousands": ",",
+                    "sLengthMenu": "Afficher _MENU_ éléments",
+                    "sLoadingRecords": "Chargement...",
+                    "sProcessing": "Traitement...",
+                    "sSearch": "Rechercher :",
+                    "sZeroRecords": "Aucun élément correspondant trouvé",
+                    "oPaginate": {
+                        "sFirst": "Premier",
+                        "sLast": "Dernier",
+                        "sNext": "Suivant",
+                        "sPrevious": "Précédent"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": activer pour trier la colonne par ordre croissant",
+                        "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+                    },
+                    "select": {
+                        "rows": {
+                            "_": "%d lignes sélectionnées",
+                            "0": "Aucune ligne sélectionnée",
+                            "1": "1 ligne sélectionnée"
+                        }
+                    }
+                },
+                responsive: true,
+                scrollY: false, // raha scrollena de asina val ex 400
+                scrollX: true,
+                scrollCollapse: true,
+                paging: true,
+                autoFill: true
+            });
+
+            new $.fn.dataTable.FixedHeader(table);
+        });
+	
+	</script>
+{% endblock %}

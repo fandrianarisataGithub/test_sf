@@ -1,0 +1,234 @@
+{% extends "base.html.twig" %}
+{% block title %}
+    Register client
+{% endblock %}
+{% block body %}
+<div class="titre_page">
+	<h2>Enregistrement de client</h2>
+</div>
+    {{ form_start(form) }}
+    <div class ="row">
+        <div class="col-md-4">
+		<div class="form-group">
+                {{ form_row(form.matricule, {
+                    'label':"Matricule du client:"
+                }) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.nom, {
+                    'label':"Nom du client:"
+                }) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.prenom, {
+                    'label':"Prénom du client (facultatif):"
+                }) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.adresse , {
+                    'label':"Adresse exacte du client:"
+                }) }}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                {{ form_row(form.cin, {
+                    'label':"Numéro CIN:"
+                }) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.image_1, {
+                    'label':"Face avant du CIN:"
+                }) }}
+                 
+            </div>
+             <div class="form-group">
+                  {{ form_row(form.image_2, {
+                    'label':"Face arrière du CIN:"
+                }) }}
+            </div>
+        </div>
+         <div class="col-md-4">
+            <div class="form-group">
+                {{ form_row(form.montant, {
+                    "label" : "Montant total:"
+                }) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.montant_mensuel, {
+                    "label" : "Montant mensuel:"
+                }) }}
+            </div>
+            <div class="form-group">
+                {{ form_row(form.nbr_versement, {
+                    "label" : "Nombre de versement:"
+                }) }}
+            </div>
+			 <div class="form-group">
+                {{ form_row(form.date_debut, {
+                    "label" : "Date de début:"
+                }) }}
+            </div>
+            <div class="form-group">
+                 {{ form_row(form.date_fin, {
+                    "label" : "Date de fin(variable):"
+                }) }}
+            </div>
+        </div>
+    </div>
+    {{ form_end(form) }}
+
+    <div class="titre_page">
+        <h2>Liste des derniers clients enregistrer</h2>
+    </div>
+<div class="tableau tab_historique" style="margin-bottom:50px;">
+	<table class="display" id="tab_client_heb" style="width:100%">
+		<thead>
+			<tr>
+				<td>
+					<span>MATRICULE</span>
+				</td>
+				<td>
+					<span>NOM ET PRENOM</span>
+				</td>
+				<td>
+					<span>CIN</span>
+				</td>
+				<td>
+					<span>ADRESSE</span>
+				</td>
+				<td>
+					<span>MONTANT</span>
+				</td>
+				<td>
+					<span>MONTANT
+						<br>
+						MENSUEL</span>
+				</td>
+				<td>
+					<span>NBR VERSEMENT</span>
+				</td>
+				<td>
+					<span>DATE DE DEBUT</span>
+				</td>
+				<td>
+					<span>DATE DE FIN</span>
+				</td>
+				<td>
+					<span>ACTIONS</span>
+				</td>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in items %}
+				<tr>
+					<td>
+						<span>{{ item.matricule }}</span>
+					</td>
+					<td>
+						<span>{{ item.nom }}</span><br>
+						<span>{{  item.prenom }}</span>
+					</td>
+					<td>
+						<span>{{ item.cin }}</span>
+					</td>
+					<td>
+						<span>{{ item.adresse }}</span>
+					</td>
+					<td>
+						<span>{{ item.montant }}</span>
+						<span>Ar</span>
+					</td>
+					<td>
+						<span>{{ item.getMontantMensuel() }}</span>
+						<span>Ar</span>
+					</td>
+					<td>
+						<span>{{ item.getNbrVersement() }}</span>
+						<span>Ar</span>
+					</td>
+					<td>
+						<span>{{ item.getDateDebut() | date('Y-m-d') }}</span>
+					</td>
+					<td>
+						<span>{{ item.getDatefin() | date('Y-m-d') }}</span>
+					</td>
+					<td>
+                        <div class="action">
+                            <a href="{{ path('edit_client', {'id': item.id }) }}" class="modif btn btn-info btn-xs" {% if is_granted('ROLE_ADMIN') %} style="display:flex;" {% else %} style="display:none;" {% endif %}>
+                                <span class="fa fa-edit"></span>
+                            </a>
+                            <a href="#" data-id-client = "{{ item.id }}" class="suppr btn btn-danger btn-xs" {% if is_granted('ROLE_ADMIN') %} style="display:flex;" {% else %} style="display:none;" {% endif %}>
+                                <span class="fa fa-trash-o"></span>
+                            </a>
+                            <a href="{{ path('single_page', {'id_client': item.id }) }}" class="voir btn btn-primary btn-xs" {% if is_granted('ROLE_ADMIN') %} style="display:flex;" {% else %} style="display:none;" {% endif %}>
+                                <span>Voir</span>
+                            </a>
+                        </div>
+					</td>
+
+				</tr>
+			{% endfor %} 
+
+		</tbody>
+	</table>
+</div>
+
+
+{% endblock %}
+{% block javascripts %}
+	<script>
+
+		 $(document).ready(function() {
+            var table = $('#tab_client_heb').DataTable({
+                "language": {
+                    "sEmptyTable": "Aucune donnée disponible dans le tableau",
+                    "sInfo": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
+                    "sInfoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
+                    "sInfoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+                    "sInfoPostFix": "",
+                    "sInfoThousands": ",",
+                    "sLengthMenu": "Afficher _MENU_ éléments",
+                    "sLoadingRecords": "Chargement...",
+                    "sProcessing": "Traitement...",
+                    "sSearch": "Rechercher :",
+                    "sZeroRecords": "Aucun élément correspondant trouvé",
+                    "oPaginate": {
+                        "sFirst": "Premier",
+                        "sLast": "Dernier",
+                        "sNext": "Suivant",
+                        "sPrevious": "Précédent"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": activer pour trier la colonne par ordre croissant",
+                        "sSortDescending": ": activer pour trier la colonne par ordre décroissant"
+                    },
+                    "select": {
+                        "rows": {
+                            "_": "%d lignes sélectionnées",
+                            "0": "Aucune ligne sélectionnée",
+                            "1": "1 ligne sélectionnée"
+                        }
+                    }
+				},
+				"columnDefs": [{
+					"targets": 'no-sort',
+					"orderable": false
+				}],
+                responsive: true,
+                scrollY: false, // raha scrollena de asina val ex 400
+                scrollX: true,
+                scrollCollapse: true,
+                paging: true,
+                autoFill: true
+            });
+
+			new $.fn.dataTable.FixedHeader(table);
+			
+			// modal 
+
+
+        });
+	
+	</script>
+{% endblock %}
